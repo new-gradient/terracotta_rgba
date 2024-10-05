@@ -33,16 +33,20 @@ def array_to_png(
     settings = get_settings()
     compress_level = settings.PNG_COMPRESS_LEVEL
 
-    if img_data.ndim == 3:  # encode RGB image
-        if img_data.shape[-1] != 3:
-            raise ValueError("3D input arrays must have three bands")
+    if img_data.ndim == 3:
+        if img_data.shape[-1] == 3:
+            mode = "RGB"
+            transparency = (0, 0, 0)
+            palette = None
+        elif img_data.shape[-1] == 4:
+            mode = "RGBA"
+            transparency = (0, 0, 0, 0)
+            palette = None
+        else:
+            raise ValueError("3D input arrays must have three (RGB) or four (RGBA) bands")
 
         if colormap is not None:
             raise ValueError("Colormap argument cannot be given for multi-band data")
-
-        mode = "RGB"
-        transparency = (0, 0, 0)
-        palette = None
 
     elif img_data.ndim == 2:  # encode paletted image
         mode = "L"
@@ -111,7 +115,10 @@ def array_to_png(
         img.putpalette(palette)
 
     sio = BytesIO()
-    img.save(sio, "png", compress_level=compress_level, transparency=transparency)
+    if mode == "RGBA":
+        img.save(sio, "PNG", compress_level=compress_level)
+    else:
+        img.save(sio, "PNG", compress_level=compress_level, transparency=transparency)
     sio.seek(0)
     return sio
 
