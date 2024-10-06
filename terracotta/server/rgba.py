@@ -12,6 +12,8 @@ from flask import request, send_file, Response
 from terracotta.server.fields import StringOrNumber, validate_stretch_range
 from terracotta.server.flask_api import TILE_API
 
+import logging
+
 
 class RGBAQuerySchema(Schema):
     keys = fields.String(
@@ -130,6 +132,8 @@ def get_rgba(tile_z: int, tile_y: int, tile_x: int, keys: str = "") -> Response:
                 description:
                     No dataset found for given key combination
     """
+    logging.debug(f"Received request for RGBA tile: keys={keys}, z={tile_z}, x={tile_x}, y={tile_y}")
+
     tile_xyz = (tile_x, tile_y, tile_z)
     return _get_rgba_image(keys, tile_xyz=tile_xyz)
 
